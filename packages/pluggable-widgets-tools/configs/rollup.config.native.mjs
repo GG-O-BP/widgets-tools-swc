@@ -138,7 +138,7 @@ export default async args => {
     });
 
     if (editorConfigEntry) {
-        // We target Studio Pro's JS engine that supports only es5 and no source maps
+        // Studio Pro의 JS 엔진은 es5만 지원하고 소스맵은 지원하지 않습니다
         result.push({
             input: editorConfigEntry,
             output: {
@@ -188,10 +188,10 @@ export default async args => {
                     exclude: ["**/__tests__/**/*"]
                 })
                 : null,
-            // Babel can transpile source JS and resulting JS, hence are input/output plugins. The good
-            // practice is to do the most of conversions on resulting code, since then we ensure that
-            // babel doesn't interfere with `import`s and `require`s used by rollup/commonjs plugin;
-            // also resulting code includes generated code that deserve transpilation as well.
+            // Babel은 소스 JS와 결과 JS를 모두 트랜스파일할 수 있어서 입력/출력 플러그인이 있습니다.
+            // 좋은 방법은 결과 코드에서 대부분의 변환을 수행하는 것입니다. 그래야 babel이 rollup/commonjs 플러그인이 
+            // 사용하는 `import`와 `require`를 방해하지 않습니다. 또한 결과 코드에는 트랜스파일이 필요한 
+            // 생성된 코드도 포함되어 있습니다.
             getBabelInputPlugin({
                 sourceMaps: config.sourceMaps,
                 babelrc: false,
@@ -231,11 +231,11 @@ export default async args => {
                 : null,
             image(),
             production ? terser({ mangle: false }) : null,
-            // We need to create .mpk and copy results to test project after bundling is finished.
-            // In case of a regular build is it is on `writeBundle` of the last config we define
-            // (since rollup processes configs sequentially). But in watch mode rollup re-bundles only
-            // configs affected by a change => we cannot know in advance which one will be "the last".
-            // So we run the same logic for all configs, letting the last one win.
+            // .mpk를 생성하고 번들링이 완료된 후 테스트 프로젝트에 결과물을 복사해야 합니다.
+            // 일반 빌드의 경우 마지막 설정의 `writeBundle`에서 실행됩니다
+            // (rollup이 설정을 순차적으로 처리하기 때문에). 하지만 watch 모드에서는 rollup이 
+            // 변경된 설정만 다시 번들링하므로 => 어떤 것이 "마지막"이 될지 미리 알 수 없습니다.
+            // 따라서 모든 설정에 대해 동일한 로직을 실행하고, 마지막 것이 우선하도록 합니다.
             command([
                 async () => config.licenses && copyLicenseFile(sourcePath, outDir),
                 async () =>

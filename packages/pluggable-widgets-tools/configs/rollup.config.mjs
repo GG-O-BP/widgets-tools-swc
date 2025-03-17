@@ -79,16 +79,16 @@ const commonExternalLibs = [
 const webExternal = [...commonExternalLibs, /^big.js$/];
 
 /**
- * This function is used by postcss-url.
- * Its main purpose to "adjust" asset path so that
- * after bundling css by studio assets paths stay correct.
- * Adjustment is required because of assets copying -- postcss-url can copy
- * files, but final url will be relative to *destination* file and though
- * will be broken after bundling by studio (pro).
+ * 이 함수는 postcss-url에서 사용됩니다.
+ * 주요 목적은 스튜디오에서 CSS를 번들링한 후에도 
+ * 에셋 경로가 올바르게 유지되도록 경로를 "조정"하는 것입니다.
+ * 에셋을 복사하기 때문에 조정이 필요합니다 -- postcss-url은 파일을 복사할 수 있지만
+ * 최종 URL은 *대상* 파일을 기준으로 상대 경로가 되어
+ * 스튜디오(pro)에서 번들링 후 깨질 수 있습니다.
  *
- * Example
- * before: assets/icon.png
- * after: com/mendix/widget/web/accordion/assets/icon.png
+ * 예시
+ * 이전: assets/icon.png
+ * 이후: com/mendix/widget/web/accordion/assets/icon.png
  */
 const cssUrlTransform = asset =>
     asset.url.startsWith(`${assetsDirName}/`) ? `${outWidgetDir.replace(/\\/g, "/")}/${asset.url}` : asset.url;
@@ -115,7 +115,7 @@ export default async args => {
                 url({
                     include: imagesAndFonts,
                     limit: 0,
-                    publicPath: `${join("widgets", outAssetsDir)}/`, // Prefix for the actual import, relative to Mendix web server root
+                    publicPath: `${join("widgets", outAssetsDir)}/`, // Mendix 웹 서버 루트를 기준으로 한 실제 임포트의 접두사
                     destDir: absoluteOutAssetsDir
                 }),
                 postCssPlugin(outputFormat, production),
@@ -172,7 +172,7 @@ export default async args => {
     }
 
     if (editorConfigEntry) {
-        // We target Studio Pro's JS engine that supports only es5 and no source maps
+        // Studio Pro의 JS 엔진은 es5만 지원하고 소스맵은 지원하지 않습니다
         result.push({
             input: editorConfigEntry,
             output: {
@@ -231,10 +231,10 @@ export default async args => {
                     exclude: ["**/__tests__/**/*"]
                 })
                 : null,
-            // Babel can transpile source JS and resulting JS, hence are input/output plugins. The good
-            // practice is to do the most of conversions on resulting code, since then we ensure that
-            // babel doesn't interfere with `import`s and `require`s used by rollup/commonjs plugin;
-            // also resulting code includes generated code that deserve transpilation as well.
+            // Babel은 소스 JS와 결과 JS를 모두 트랜스파일할 수 있어서 입력/출력 플러그인이 있습니다.
+            // 좋은 방법은 결과 코드에서 대부분의 변환을 수행하는 것입니다. 그래야 babel이 rollup/commonjs 플러그인이 
+            // 사용하는 `import`와 `require`를 방해하지 않습니다. 또한 결과 코드에는 트랜스파일이 필요한 
+            // 생성된 코드도 포함되어 있습니다.
             getBabelInputPlugin({
                 sourceMaps: config.sourceMaps,
                 babelrc: false,
@@ -290,11 +290,11 @@ export default async args => {
                     }
                 })
                 : null,
-            // We need to create .mpk and copy results to test project after bundling is finished.
-            // In case of a regular build is it is on `writeBundle` of the last config we define
-            // (since rollup processes configs sequentially). But in watch mode rollup re-bundles only
-            // configs affected by a change => we cannot know in advance which one will be "the last".
-            // So we run the same logic for all configs, letting the last one win.
+            // .mpk를 생성하고 번들링이 완료된 후 테스트 프로젝트에 결과물을 복사해야 합니다.
+            // 일반 빌드의 경우 마지막 설정의 `writeBundle`에서 실행됩니다
+            // (rollup이 설정을 순차적으로 처리하기 때문에). 하지만 watch 모드에서는 rollup이 
+            // 변경된 설정만 다시 번들링하므로 => 어떤 것이 "마지막"이 될지 미리 알 수 없습니다.
+            // 따라서 모든 설정에 대해 동일한 로직을 실행하고, 마지막 것이 우선하도록 합니다.
             command([
                 async () => config.licenses && copyLicenseFile(sourcePath, outDir),
                 async () =>
@@ -336,18 +336,18 @@ export function postCssPlugin(outputFormat, production, postcssPlugins = []) {
         plugins: [
             postcssImport(),
             /**
-             * We need two copies of postcss-url because of final styles bundling in studio (pro).
-             * On line below, we just copying assets to widget bundle directory (com.mendix.widgets...)
-             * To make it work, this plugin have few requirements:
-             * 1. You should put your assets in src/assets/
-             * 2. You should use relative path in your .scss files (e.g. url(../assets/icon.png)
-             * 3. This plugin relies on `to` property of postcss plugin and it should be present, when
-             * copying files to destination.
+             * 스튜디오(pro)에서 최종 스타일 번들링을 위해 postcss-url 복사본 두 개가 필요합니다.
+             * 아래 줄에서는 위젯 번들 디렉토리(com.mendix.widgets...)로 에셋을 복사하기만 합니다.
+             * 이 플러그인이 작동하려면 다음 요구사항이 필요합니다:
+             * 1. 에셋을 src/assets/에 넣어야 합니다
+             * 2. .scss 파일에서 상대 경로를 사용해야 합니다 (예: url(../assets/icon.png))
+             * 3. 이 플러그인은 postcss 플러그인의 `to` 속성에 의존하며, 파일을 대상 위치로
+             * 복사할 때 이 속성이 있어야 합니다.
              */
             postcssUrl({ url: "copy", assetsPath: "assets" }),
             /**
-             * This instance of postcss-url is just for adjusting asset path.
-             * Check doc comment for *createCssUrlTransform* for explanation.
+             * 이 postcss-url 인스턴스는 에셋 경로를 조정하기 위한 것입니다.
+             * 자세한 설명은 *createCssUrlTransform* 문서 주석을 확인하세요.
              */
             postcssUrl({ url: cssUrlTransform }),
             ...postcssPlugins
